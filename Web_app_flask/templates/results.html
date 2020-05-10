@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link  rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles/results.css')}}">
+    </head>
+    <body>
+        <table id="customers">
+            <caption>Results</caption>
+            <tr>
+                <th>Image</th>
+                <th>Model</td>
+                <th>Label_1</td>
+                <th>Confidence_1</td>
+                <th>Label_2</td>
+                <th>Confidence_2</td>
+                <th>Label_3</td>
+                <th>COnfidence_3</td>
+            </tr>
+            {%for i in data%}
+            <tr>
+                <td>{{i[0]}}</td>
+                <td>{{i[1]}}</td>
+                <td>{{i[2]}}</td>
+                <td>{{i[3]}}</td>
+                <td>{{i[4]}}</td>
+                <td>{{i[5]}}</td>
+                <td>{{i[6]}}</td>
+                <td>{{i[7]}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <form action="/results/{{name}}/{{f_name}}/{{l_name}}/{{expert_label}}" method="POST">
+            <button type="submit">Voltar / Inserir dados</button>
+        </form>
+    </body>
+</html>

@@ -1,0 +1,4 @@
+1. "cd Desktop/app" - ou pasta do projeto
+2. ". venv/bin/activate"
+3. "export FLASK_ENV=development"
+4. "export FLASK_APP=web_app.py" - aplicação flask

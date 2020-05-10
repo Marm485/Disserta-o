@@ -1,0 +1,77 @@
+body{
+    background-color: rgb(255, 255, 255);
+}
+
+#container{
+    color: white;
+    width: 400px;
+    height: 300px;
+    margin: auto;
+    right: 0;
+    left: 0;
+    top: 150px;
+    position: absolute;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 20px;
+    text-align: center;
+    border-color: white;
+    background-color: rgb(49, 176, 199);
+}
+
+h1{
+    text-align: center;
+    font-size: 25px;
+    font-family: 'Times New Roman', Times, serif;
+    color: white;
+}
+
+input[type="file"]{
+    display: none;
+}
+
+input[type="text"]{
+    margin: 5px 0;
+    font-size: 16px;
+    padding: 5px 7px;
+}
+
+.lbl{
+    font-size: 17px;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+#fimage{
+    width: 150px;
+    height: 45px;
+    font-size: 20px;
+    margin: auto;
+    margin-top: 4px;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-style: solid;
+    border-radius: 5px;
+    border-color: white;
+    border-width: 1px;
+    cursor: pointer;
+}
+
+button{
+    margin-top: 10px;
+    font-size: 15px;
+    height: 30px;
+    border-radius: 5px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+button:hover{
+    background-color: inherit;
+    color: white;
+}

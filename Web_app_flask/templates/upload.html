@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link  rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles/upload.css')}}">
+        <script>
+            
+        </script>
+    </head>
+    <body>
+        <div id="container">
+            <h1>Test Models</h1>
+
+            <hr>
+
+            <form action="/upload-image" method="POST" enctype="multipart/form-data">
+                <label for="fname" class="lbl">First name: </label>
+                <input type="text" id="fname" name="fname"><br>
+                <label for="lname" class="lbl">Last name: </label>
+                <input type="text" id="lname" name="lname"><br>
+                <label for="species" class="lbl">Species: </label>
+                <input type="text" id="species_in" name="species_in" list="species_lt" onchange="populate(this.id,'species_lt')"></input>
+                <datalist id="species_lt">
+                </datalist>
+                <br>
+                <div id="container_form">
+                    <div id="custom_file">
+                        <input type="file" name="image" id="image">
+                        <label for="image" id="fimage">Select image</label>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn_submit">Upload image</button>
+
+            </form>
+        </div>
+    </body>
+</html>

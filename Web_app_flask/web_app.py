@@ -160,7 +160,7 @@ def upload_image():
         if request.values:
             f_name = request.form['fname']
             l_name = request.form['lname']
-            expert_label = request.form['species']
+            expert_label = request.form['species_in']
             print(f_name,l_name,expert_label)
         else:
             print('No values in request!')

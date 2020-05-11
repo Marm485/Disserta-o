@@ -2,9 +2,7 @@
 <html>
     <head>
         <link  rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles/upload.css')}}">
-        <script>
-            
-        </script>
+        <script src="{{url_for('static',filename='js/script.js')}}"></script>
     </head>
     <body>
         <div id="container">
@@ -18,8 +16,8 @@
                 <label for="lname" class="lbl">Last name: </label>
                 <input type="text" id="lname" name="lname"><br>
                 <label for="species" class="lbl">Species: </label>
-                <input type="text" id="species_in" name="species_in" list="species_lt" onchange="populate(this.id,'species_lt')"></input>
-                <datalist id="species_lt">
+                <input type="text" id="species_in" name="species_in" list="species_lt"></input>
+                <datalist id="species_lt" name="species_lt">
                 </datalist>
                 <br>
                 <div id="container_form">

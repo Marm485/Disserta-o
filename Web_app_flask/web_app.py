@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, url_for, redirect, request, session
 import os
 from werkzeug.utils import secure_filename
 import tensorflow as tf
@@ -69,8 +69,8 @@ create_tests_table = '''
 CREATE TABLE IF NOT EXISTS tests
 (
     id integer PRIMARY KEY,
-    expert_id integer NOT NULL,
     filename text NOT NULL,
+    expert_id integer NOT NULL,
     data text NOT NULL,
     expert_label text NOT NULL,
     img blob NOT NULL,
@@ -112,17 +112,17 @@ def insert_in_db(conn,db,query):
     if db == 'tests':
         try:
             cursor.execute('''INSERT INTO tests
-            VALUES (?,?,?,?,?,?)''',query)
+            VALUES (?,?,?,?,?,?,?)''',query)
             conn.commit()
         except sqlite3.Error as error:
-            print('Failed to insert data in table tests', error)
+            print('Failed to insert data in table tests - ', error)
     elif db == 'classifications':
         try:
             cursor.execute('''INSERT INTO classifications
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''',query)
             conn.commit()
         except sqlite3.Error as error:
-            print('Failed to insert data in table classifications', error)
+            print('Failed to insert data in table classifications - ', error)
     else:
         print('Error: table {} not found!'.format(db))
 
@@ -154,37 +154,43 @@ def upload_image():
     if request.method == "POST":
         #check image
         if request.files:
-            image = request.files["image"]
+            images = request.files.getlist("images[]")
+            #print(images)
 
         #check specialist data
         if request.values:
             f_name = request.form['fname']
             l_name = request.form['lname']
             expert_label = request.form['species_in']
-            print(f_name,l_name,expert_label)
+            #print(f_name,l_name,expert_label)
         else:
             print('No values in request!')
             redirect(request.url)
 
-        # file with no name
-        if image.filename == "":
-            print("Image must have a name!")
-            # redirects to the original url so another image can be uploaded
-            redirect(request.url)
-
+        extension = True
         # wrong file extension
-        if not check_extension(image.filename):
-            print("Error: file extensions allowed %s!" % (ALLOWED_EXTENSIONS))
+        for image in images:
+            #print(image.filename)
+            if not check_extension(image.filename):
+                print("Error: file extensions allowed %s!" % (ALLOWED_EXTENSIONS))
+                extension = False
+        
+        if extension == False:
             redirect(request.url)
         else:
-            filename = secure_filename(image.filename)
+            names = ""
+            for image in images:
+                filename = secure_filename(image.filename)
 
-            image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
 
-            print('Image has been saved!')
+                names = names + filename + ","
 
-            return redirect(url_for('loading_results', name=image.filename,\
-                 f_name=f_name, l_name=l_name, expert_label=expert_label))
+                print('Image has been saved!')
+
+            #print(names)
+            return redirect(url_for('loading_results', names=names,\
+                f_name=f_name, l_name=l_name, expert_label=expert_label))
     else:
         print('No image selected!')
         redirect(request.url)
@@ -192,49 +198,64 @@ def upload_image():
     return render_template("upload.html")
 
 
-@app.route('/results/<name>/<f_name>/<l_name>/<expert_label>', methods=['GET','POST'])
-def loading_results(name,f_name,l_name,expert_label):
+@app.route('/results/<names>/<f_name>/<l_name>/<expert_label>', methods=['GET','POST'])
+def loading_results(names,f_name,l_name,expert_label):
     if request.method == 'GET':
-        filename = app.config["IMAGE_UPLOADS"] + '/' + name
         #connect to database
         conn = connect_to_db()
         cursor = conn.cursor()
 
         #date
         today = date.today()
-        
-        #test's id
-        id = get_id(cursor,'tests')
-        
-        expert_id = 1050 #colocar em textbox na interface
-        
-        #image to blob, to send to the db
-        img_blob = converttoBinary(filename)
-        
-        #values to insert in table 'tests'
-        data_tests = (id,expert_id,str(today),expert_label,img_blob,'notas')        
-        insert_in_db(conn,'tests',data_tests)
-        
+
+        names = names.split(',')
+
+        #list with results to show in html table
         info = []
         
-        for i in range(3):
-            model = Model(MODEL_FILES[i], LABEL_FILES[i])
-            output = model.classify(MODEL_NAMES[i],filename)
-            #print(output)
-            info.append(output)
-            #classification's id
-            classif_id = get_id(cursor,'classifications')
-            data_classifications = (classif_id,id,MODEL_NAMES[i],output[2],\
-                output[3],output[4],output[5],output[6],output[7],\
-                    output[8],output[9],output[10],output[11])
-            insert_in_db(conn,'classifications',data_classifications)
+        #for each image
+        for name in names:
+            if name == '':
+                break
+
+            #test's id
+            id = get_id(cursor,'tests')
+            
+            expert_id = 1050 #colocar em textbox na interface
+
+            filename = app.config["IMAGE_UPLOADS"] + '/' + name
+
+            #image to blob, to send to the db
+            img_blob = converttoBinary(filename)
+            
+            #values to insert in table 'tests'
+            data_tests = (id,name,expert_id,str(today),expert_label,img_blob,'notas')        
+            insert_in_db(conn,'tests',data_tests)
+            
+            #test each model with the image
+            for i in range(3):
+                model = Model(MODEL_FILES[i], LABEL_FILES[i])
+                output = model.classify(MODEL_NAMES[i],filename)
+
+                info.append(output)
+
+                #classification's id
+                classif_id = get_id(cursor,'classifications')
+
+                #insert in db
+                data_classifications = (classif_id,id,MODEL_NAMES[i],output[2],\
+                    output[3],output[4],output[5],output[6],output[7],\
+                        output[8],output[9],output[10],output[11])
+                insert_in_db(conn,'classifications',data_classifications)
+
         conn.commit()
         conn.close()
+    
     #back to the main page
     if request.method == 'POST':
         return redirect(url_for('upload_image'))
 
-    return render_template("results.html",data=info,name=name,\
+    return render_template("results.html",data=info,names=names,\
         f_name=f_name,l_name=l_name,expert_label=expert_label)
 
 

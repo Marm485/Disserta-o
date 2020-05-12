@@ -205,6 +205,7 @@ def loading_results(names,f_name,l_name,expert_label):
         conn = connect_to_db()
         cursor = conn.cursor()
 
+        exp_label = {'label':expert_label}
         #date
         today = date.today()
 
@@ -256,7 +257,7 @@ def loading_results(names,f_name,l_name,expert_label):
         return redirect(url_for('upload_image'))
 
     return render_template("results.html",data=info,names=names,\
-        f_name=f_name,l_name=l_name,expert_label=expert_label)
+        f_name=f_name,l_name=l_name,expert_label=exp_label)
 
 
 if __name__ == '__main__':

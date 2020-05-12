@@ -2,19 +2,20 @@
 <html>
     <head>
         <link  rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles/results.css')}}">
+        <script src="{{url_for('static',filename='js/results_proc.js')}}"></script>
     </head>
     <body>
         <table id="customers">
             <caption>Results</caption>
             <tr>
                 <th>Image</th>
-                <th>Model</td>
-                <th>Label_1</td>
-                <th>Confidence_1</td>
-                <th>Label_2</td>
-                <th>Confidence_2</td>
-                <th>Label_3</td>
-                <th>COnfidence_3</td>
+                <th>Model</th>
+                <th>Label_1</th>
+                <th>Confidence_1</th>
+                <th>Label_2</th>
+                <th>Confidence_2</th>
+                <th>Label_3</th>
+                <th>Confidence_3</th>
             </tr>
             {%for i in data%}
             <tr>
@@ -30,7 +31,12 @@
             {% endfor %}
         </table>
         <form action="/results/{{names}}/{{f_name}}/{{l_name}}/{{expert_label}}" method="POST">
-            <button type="submit">Voltar / Inserir dados</button>
+            <button type="submit">Voltar / Inserir novos dados</button>
+            <label>Classification and confidence according to submited species</label>
         </form>
+        <script type="text/javascript">
+            var label = {{ expert_label.label|tojson }}
+            get_rows(label);
+        </script>
     </body>
 </html>

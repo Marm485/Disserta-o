@@ -31,3 +31,13 @@ button{
     cursor: pointer;
     font-family: 'Times New Roman', Times, serif;
 }
+
+label{
+  right: 7px;
+  background-color: #6699ff;
+  border-radius: 2px;
+  font-size: 15px;
+  padding: 7px;
+  position: absolute;
+  margin-top: 16px;
+}

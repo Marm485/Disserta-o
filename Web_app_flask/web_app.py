@@ -48,8 +48,8 @@ class Model:
                 top_categories = top_categories[:maxResults]
             #print("==> %s <==" % file)
             info = []
-            info.append(str(file)[(str(file).rfind('/')+1):])
             info.append(model_name)
+            info.append(str(file)[(str(file).rfind('/')+1):])
             for i in top_categories:
                 if self.floating_model:
                     r = float(results[i])
@@ -211,8 +211,12 @@ def loading_results(names,f_name,l_name,expert_label):
 
         names = names.split(',')
 
-        #list with results to show in html table
-        info = []
+        rowspan = len(names)-1
+        t_rows = (len(names)-1)*3
+
+        inat = []
+        flora = []
+        boaf = []
         
         #for each image
         for name in names:
@@ -238,7 +242,13 @@ def loading_results(names,f_name,l_name,expert_label):
                 model = Model(MODEL_FILES[i], LABEL_FILES[i])
                 output = model.classify(MODEL_NAMES[i],filename)
 
-                info.append(output)
+                #'iNaturalist','Flora_On_and_iNat','Flora_On'
+                if MODEL_NAMES[i] == 'iNaturalist':
+                    inat.append(output)
+                elif MODEL_NAMES[i] == 'Flora_On_and_iNat':
+                    boaf.append(output)
+                else:
+                    flora.append(output)
 
                 #classification's id
                 classif_id = get_id(cursor,'classifications')
@@ -248,7 +258,7 @@ def loading_results(names,f_name,l_name,expert_label):
                     output[3],output[4],output[5],output[6],output[7],\
                         output[8],output[9],output[10],output[11])
                 insert_in_db(conn,'classifications',data_classifications)
-
+        info = [*flora,*inat,*boaf]    
         conn.commit()
         conn.close()
     
@@ -256,8 +266,8 @@ def loading_results(names,f_name,l_name,expert_label):
     if request.method == 'POST':
         return redirect(url_for('upload_image'))
 
-    return render_template("results.html",data=info,names=names,\
-        f_name=f_name,l_name=l_name,expert_label=exp_label)
+    return render_template("results.html",t_rows=t_rows,row_span=rowspan,data=info,\
+        names=names,f_name=f_name,l_name=l_name,expert_label=exp_label)
 
 
 if __name__ == '__main__':

@@ -8,26 +8,50 @@
         <table id="customers">
             <caption>Results</caption>
             <tr>
-                <th>Image</th>
                 <th>Model</th>
+                <th>Image</th>
                 <th>Label_1</th>
                 <th>Confidence_1</th>
                 <th>Label_2</th>
                 <th>Confidence_2</th>
                 <th>Label_3</th>
                 <th>Confidence_3</th>
+                <th>Label_4</th>
+                <th>Confidence_4</th>
+                <th>Label_5</th>
+                <th>Confidence_5</th>
             </tr>
-            {%for i in data%}
-            <tr>
-                <td>{{i[0]}}</td>
-                <td>{{i[1]}}</td>
-                <td>{{i[2]}}</td>
-                <td>{{i[3]}}</td>
-                <td>{{i[4]}}</td>
-                <td>{{i[5]}}</td>
-                <td>{{i[6]}}</td>
-                <td>{{i[7]}}</td>
-            </tr>
+            {%for i in range(t_rows)%}
+                {% if i%row_span == 0 %}
+                    <tr>
+                        <td rowspan="{{row_span}}">{{data[i][0]}}</td>
+                        <td>{{data[i][1]}}</td>
+                        <td>{{data[i][2]}}</td>
+                        <td>{{data[i][3]}}</td>
+                        <td>{{data[i][4]}}</td>
+                        <td>{{data[i][5]}}</td>
+                        <td>{{data[i][6]}}</td>
+                        <td>{{data[i][7]}}</td>
+                        <td>{{data[i][8]}}</td>
+                        <td>{{data[i][9]}}</td>
+                        <td>{{data[i][10]}}</td>
+                        <td>{{data[i][11]}}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{{data[i][1]}}</td>
+                        <td>{{data[i][2]}}</td>
+                        <td>{{data[i][3]}}</td>
+                        <td>{{data[i][4]}}</td>
+                        <td>{{data[i][5]}}</td>
+                        <td>{{data[i][6]}}</td>
+                        <td>{{data[i][7]}}</td>
+                        <td>{{data[i][8]}}</td>
+                        <td>{{data[i][9]}}</td>
+                        <td>{{data[i][10]}}</td>
+                        <td>{{data[i][11]}}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
         <form action="/results/{{names}}/{{f_name}}/{{l_name}}/{{expert_label}}" method="POST">

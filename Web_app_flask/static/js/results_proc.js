@@ -1,15 +1,10 @@
-function get_rows(label){
-    var results = document.getElementById("customers");
+function get_rows(id,label){
+    var results = document.getElementById(id);
     r = 0;
-    var prev = null;
     while(row = results.rows[r++]){
         var c = 0;
         while(cell = row.cells[c++]){
-            if(prev == true){
-                cell.style.backgroundColor = "#6699ff";
-                prev = false;
-            }
-            else if(cell.innerHTML == label){
+            if(cell.innerHTML.substring(0,cell.innerHTML.lastIndexOf(" ")) == label){
                 cell.style.backgroundColor = "#6699ff";
                 prev = true;
             }

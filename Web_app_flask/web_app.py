@@ -9,7 +9,8 @@ from datetime import date
 
 app = Flask(__name__)
 
-app.config["IMAGE_UPLOADS"] = "/home/marm/Desktop/app/static/imgs"
+app.config["IMAGE_UPLOADS"] = 'static/imgs'
+app.config["IMAGE_THUMBNAILS"] = "static/thumbnails"
 
 ALLOWED_EXTENSIONS = {'jpeg', 'png', 'jpg'}
 MODEL_FILES = ['models/iNaturalist.tflite',
@@ -60,10 +61,6 @@ class Model:
                 info.append(self.labels[i].replace(' ','_'))
                 info.append(str(round((r*100), 2)))
             return info
-
-# def set_model(model_file, label_file):
-#    model = Model(model_file, label_file)
-#    return model
 
 create_tests_table = '''
 CREATE TABLE IF NOT EXISTS tests
@@ -144,6 +141,19 @@ def check_extension(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def generate_thumbnail(inp,out):
+    image = Image.open(inp)
+    #debug('Image dimensions: %d x %d' % (image.width, image.height))
+    max_pixels = 320
+    aspect_ratio = float(image.width) / float(image.height)
+    if aspect_ratio > 1.0:
+        (new_width, new_height) = (max_pixels, int(max_pixels / aspect_ratio))
+    else:
+        (new_width, new_height) = (int(max_pixels * aspect_ratio), max_pixels)
+    #debug('Thumbnail dimensions: %d x %d' % (new_width, new_height))
+    thumb_image = image.resize((new_width, new_height))
+    thumb_image.save(out)
+
 @app.route("/")
 def hello_world():
     return redirect(url_for('upload_image'))
@@ -160,9 +170,7 @@ def upload_image():
         #check specialist data
         if request.values:
             f_name = request.form['fname']
-            l_name = request.form['lname']
             expert_label = request.form['species_in']
-            #print(f_name,l_name,expert_label)
         else:
             print('No values in request!')
             redirect(request.url)
@@ -170,7 +178,6 @@ def upload_image():
         extension = True
         # wrong file extension
         for image in images:
-            #print(image.filename)
             if not check_extension(image.filename):
                 print("Error: file extensions allowed %s!" % (ALLOWED_EXTENSIONS))
                 extension = False
@@ -190,7 +197,7 @@ def upload_image():
 
             #print(names)
             return redirect(url_for('loading_results', names=names,\
-                f_name=f_name, l_name=l_name, expert_label=expert_label))
+                f_name=f_name, expert_label=expert_label))
     else:
         print('No image selected!')
         redirect(request.url)
@@ -198,8 +205,8 @@ def upload_image():
     return render_template("upload.html")
 
 
-@app.route('/results/<names>/<f_name>/<l_name>/<expert_label>', methods=['GET','POST'])
-def loading_results(names,f_name,l_name,expert_label):
+@app.route('/results/<names>/<f_name>/<expert_label>', methods=['GET','POST'])
+def loading_results(names,f_name,expert_label):
     if request.method == 'GET':
         #connect to database
         conn = connect_to_db()
@@ -210,18 +217,17 @@ def loading_results(names,f_name,l_name,expert_label):
         today = date.today()
 
         names = names.split(',')
+        #eliminate last element
+        del names[-1]
 
-        rowspan = len(names)-1
-        t_rows = (len(names)-1)*3
+        rowspan = len(names)
 
         inat = []
+        fl_inat = []
         flora = []
-        boaf = []
         
         #for each image
         for name in names:
-            if name == '':
-                break
 
             #test's id
             id = get_id(cursor,'tests')
@@ -229,6 +235,9 @@ def loading_results(names,f_name,l_name,expert_label):
             expert_id = 1050 #colocar em textbox na interface
 
             filename = app.config["IMAGE_UPLOADS"] + '/' + name
+            thumbnail_name = app.config["IMAGE_THUMBNAILS"] + '/' + name
+
+            generate_thumbnail(filename,thumbnail_name)
 
             #image to blob, to send to the db
             img_blob = converttoBinary(filename)
@@ -243,10 +252,10 @@ def loading_results(names,f_name,l_name,expert_label):
                 output = model.classify(MODEL_NAMES[i],filename)
 
                 #'iNaturalist','Flora_On_and_iNat','Flora_On'
-                if MODEL_NAMES[i] == 'iNaturalist':
+                if MODEL_NAMES[i] == "iNaturalist":
                     inat.append(output)
-                elif MODEL_NAMES[i] == 'Flora_On_and_iNat':
-                    boaf.append(output)
+                elif MODEL_NAMES[i] == "Flora_On_and_iNat":
+                    fl_inat.append(output)
                 else:
                     flora.append(output)
 
@@ -258,7 +267,6 @@ def loading_results(names,f_name,l_name,expert_label):
                     output[3],output[4],output[5],output[6],output[7],\
                         output[8],output[9],output[10],output[11])
                 insert_in_db(conn,'classifications',data_classifications)
-        info = [*flora,*inat,*boaf]    
         conn.commit()
         conn.close()
     
@@ -266,8 +274,9 @@ def loading_results(names,f_name,l_name,expert_label):
     if request.method == 'POST':
         return redirect(url_for('upload_image'))
 
-    return render_template("results.html",t_rows=t_rows,row_span=rowspan,data=info,\
-        names=names,f_name=f_name,l_name=l_name,expert_label=exp_label)
+    return render_template("results.html",row_span=rowspan,inat=inat,\
+        fl_inat=fl_inat,flora=flora,names=names,\
+            f_name=f_name,expert_label=exp_label)
 
 
 if __name__ == '__main__':

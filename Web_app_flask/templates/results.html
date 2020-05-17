@@ -5,62 +5,35 @@
         <script src="{{url_for('static',filename='js/results_proc.js')}}"></script>
     </head>
     <body>
-        <table id="customers">
-            <caption>Results</caption>
-            <tr>
-                <th>Model</th>
-                <th>Image</th>
-                <th>Label_1</th>
-                <th>Confidence_1</th>
-                <th>Label_2</th>
-                <th>Confidence_2</th>
-                <th>Label_3</th>
-                <th>Confidence_3</th>
-                <th>Label_4</th>
-                <th>Confidence_4</th>
-                <th>Label_5</th>
-                <th>Confidence_5</th>
-            </tr>
-            {%for i in range(t_rows)%}
-                {% if i%row_span == 0 %}
+        {%for i in range(row_span)%}
+        <h3>{{names[i]}}</h3>
+        <img src="{{url_for('static',filename='thumbnails/'+names[i])}}" alt="Plant image!"/>
+            <table class="customers" id="{{names[i]}}">
+                <tr>
+                    <th>#</th>
+                    <th>iNat</th>
+                    <th>FloraOn + iNat</th>
+                    <th>FloraOn</th>
+                </tr>
+                {% for j in range(2,11,2)%}
                     <tr>
-                        <td rowspan="{{row_span}}">{{data[i][0]}}</td>
-                        <td>{{data[i][1]}}</td>
-                        <td>{{data[i][2]}}</td>
-                        <td>{{data[i][3]}}</td>
-                        <td>{{data[i][4]}}</td>
-                        <td>{{data[i][5]}}</td>
-                        <td>{{data[i][6]}}</td>
-                        <td>{{data[i][7]}}</td>
-                        <td>{{data[i][8]}}</td>
-                        <td>{{data[i][9]}}</td>
-                        <td>{{data[i][10]}}</td>
-                        <td>{{data[i][11]}}</td>
+                        <td>{{j - (j/2)}}</td>
+                        <td>{{inat[i][j]}} ({{inat[i][j+1]}})</td>
+                        <td>{{fl_inat[i][j]}} ({{fl_inat[i][j+1]}})</td>
+                        <td>{{flora[i][j]}} ({{flora[i][j+1]}})</td>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td>{{data[i][1]}}</td>
-                        <td>{{data[i][2]}}</td>
-                        <td>{{data[i][3]}}</td>
-                        <td>{{data[i][4]}}</td>
-                        <td>{{data[i][5]}}</td>
-                        <td>{{data[i][6]}}</td>
-                        <td>{{data[i][7]}}</td>
-                        <td>{{data[i][8]}}</td>
-                        <td>{{data[i][9]}}</td>
-                        <td>{{data[i][10]}}</td>
-                        <td>{{data[i][11]}}</td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </table>
-        <form action="/results/{{names}}/{{f_name}}/{{l_name}}/{{expert_label}}" method="POST">
+                {% endfor %}
+                <script type="text/javascript">
+                    var id = "{{names[i]}}";
+                    var label = id.substring(0,id.lastIndexOf("_"));
+                    get_rows(id,label);
+                </script>
+            </table>
+        <hr>
+        {% endfor %}
+        <form action="/results/{{names}}/{{f_name}}/{{expert_label}}" method="POST">
             <button type="submit">Voltar / Inserir novos dados</button>
             <label>Classification and confidence according to submited species</label>
         </form>
-        <script type="text/javascript">
-            var label = {{ expert_label.label|tojson }}
-            get_rows(label);
-        </script>
     </body>
 </html>

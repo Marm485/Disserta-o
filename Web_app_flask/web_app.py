@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS tests
 (
     id integer PRIMARY KEY,
     filename text NOT NULL,
-    expert_id integer NOT NULL,
+    expert_id text NOT NULL,
     data text NOT NULL,
     expert_label text NOT NULL,
     img blob NOT NULL,
@@ -143,14 +143,12 @@ def check_extension(filename):
 
 def generate_thumbnail(inp,out):
     image = Image.open(inp)
-    #debug('Image dimensions: %d x %d' % (image.width, image.height))
     max_pixels = 320
     aspect_ratio = float(image.width) / float(image.height)
     if aspect_ratio > 1.0:
         (new_width, new_height) = (max_pixels, int(max_pixels / aspect_ratio))
     else:
         (new_width, new_height) = (int(max_pixels * aspect_ratio), max_pixels)
-    #debug('Thumbnail dimensions: %d x %d' % (new_width, new_height))
     thumb_image = image.resize((new_width, new_height))
     thumb_image.save(out)
 
@@ -171,6 +169,9 @@ def upload_image():
         if request.values:
             f_name = request.form['fname']
             expert_label = request.form['species_in']
+            comments = request.form['comments']
+            if comments == "":
+                comments = "null"
         else:
             print('No values in request!')
             redirect(request.url)
@@ -197,7 +198,7 @@ def upload_image():
 
             #print(names)
             return redirect(url_for('loading_results', names=names,\
-                f_name=f_name, expert_label=expert_label))
+                f_name=f_name, expert_label=expert_label, comments=comments))
     else:
         print('No image selected!')
         redirect(request.url)
@@ -205,14 +206,13 @@ def upload_image():
     return render_template("upload.html")
 
 
-@app.route('/results/<names>/<f_name>/<expert_label>', methods=['GET','POST'])
-def loading_results(names,f_name,expert_label):
+@app.route('/results/<names>/<f_name>/<expert_label>/<comments>', methods=['GET','POST'])
+def loading_results(names,f_name,expert_label,comments):
     if request.method == 'GET':
         #connect to database
         conn = connect_to_db()
         cursor = conn.cursor()
 
-        exp_label = {'label':expert_label}
         #date
         today = date.today()
 
@@ -232,7 +232,7 @@ def loading_results(names,f_name,expert_label):
             #test's id
             id = get_id(cursor,'tests')
             
-            expert_id = 1050 #colocar em textbox na interface
+            expert_id = f_name #colocar em textbox na interface
 
             filename = app.config["IMAGE_UPLOADS"] + '/' + name
             thumbnail_name = app.config["IMAGE_THUMBNAILS"] + '/' + name
@@ -243,7 +243,7 @@ def loading_results(names,f_name,expert_label):
             img_blob = converttoBinary(filename)
             
             #values to insert in table 'tests'
-            data_tests = (id,name,expert_id,str(today),expert_label,img_blob,'notas')        
+            data_tests = (id,name,expert_id,str(today),expert_label,img_blob,comments)        
             insert_in_db(conn,'tests',data_tests)
             
             #test each model with the image
@@ -276,7 +276,7 @@ def loading_results(names,f_name,expert_label):
 
     return render_template("results.html",row_span=rowspan,inat=inat,\
         fl_inat=fl_inat,flora=flora,names=names,\
-            f_name=f_name,expert_label=exp_label)
+            f_name=f_name,expert_label=expert_label,comments=comments)
 
 
 if __name__ == '__main__':

@@ -4,9 +4,9 @@ body{
 
 #container{
     color: white;
-    width: 400px;
-    height: 300px;
     margin: auto;
+    width: 700px;
+    padding: 20px;
     right: 0;
     left: 0;
     top: 150px;
@@ -14,7 +14,6 @@ body{
     border-style: solid;
     border-width: 2px;
     border-radius: 20px;
-    text-align: center;
     border-color: white;
     background-color: rgb(49, 176, 199);
 }
@@ -62,16 +61,25 @@ input[type="text"]{
 }
 
 button{
-    margin-top: 10px;
+    top: 10%;
+    left: 40%;
     font-size: 15px;
     height: 30px;
     border-radius: 5px;
     transition-duration: 0.4s;
     cursor: pointer;
     font-family: 'Times New Roman', Times, serif;
+    position: relative;
 }
 
 button:hover{
     background-color: inherit;
     color: white;
+}
+
+#comments{
+    display: inline-block;
+    float: right;
+    margin-right: 20px;
+    margin-top: -35px;
 }

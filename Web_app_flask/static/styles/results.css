@@ -1,7 +1,10 @@
 .customers {
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
-    float: right;
+    display: inline-block;
+    position: relative;
+    margin-left: 10%;
+    margin-bottom: 5%;
   }
   
   .customers td, #customers th {

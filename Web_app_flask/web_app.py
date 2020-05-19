@@ -33,7 +33,7 @@ class Model:
         self.height = self.input_details[0]['shape'][1]
         self.width = self.input_details[0]['shape'][2]
 
-    def classify(self, model_name, file, maxResults=5, min_confidence=0):
+    def classify(self, model_name, file, maxResults=5, min_confidence=0.01):
         with Image.open(file).resize((self.width, self.height)) as img:
             input_data = np.expand_dims(img, axis=0)
             if self.floating_model:
@@ -83,13 +83,13 @@ CREATE TABLE IF NOT EXISTS classifications
     model text NOT NULL,
     label_1 text NOT NULL,
     confidence_1 real,
-    label_2 text NOT NULL,
+    label_2 text,
     confidence_2 real,
-    label_3 text NOT NULL,
+    label_3 text,
     confidence_3 real,
-    label_4 text NOT NULL,
+    label_4 text,
     confidence_4 real,
-    label_5 text NOT NULL,
+    label_5 text,
     confidence_5 real,
     FOREIGN KEY (test_id) REFERENCES tests(id)
 )
@@ -225,6 +225,7 @@ def loading_results(names,f_name,expert_label,comments):
         inat = []
         fl_inat = []
         flora = []
+        index = [1,1,2,2,3,3,4,4,5,5]
         
         #for each image
         for name in names:
@@ -251,6 +252,9 @@ def loading_results(names,f_name,expert_label,comments):
                 model = Model(MODEL_FILES[i], LABEL_FILES[i])
                 output = model.classify(MODEL_NAMES[i],filename)
 
+                while(len(output) < 12):
+                    output.append("")
+
                 #'iNaturalist','Flora_On_and_iNat','Flora_On'
                 if MODEL_NAMES[i] == "iNaturalist":
                     inat.append(output)
@@ -274,7 +278,7 @@ def loading_results(names,f_name,expert_label,comments):
     if request.method == 'POST':
         return redirect(url_for('upload_image'))
 
-    return render_template("results.html",row_span=rowspan,inat=inat,\
+    return render_template("results.html",index=index,row_span=rowspan,inat=inat,\
         fl_inat=fl_inat,flora=flora,names=names,\
             f_name=f_name,expert_label=expert_label,comments=comments)
 

@@ -5,6 +5,7 @@
     position: relative;
     margin-left: 10%;
     margin-bottom: 5%;
+    text-align: center;
   }
   
   .customers td, #customers th {

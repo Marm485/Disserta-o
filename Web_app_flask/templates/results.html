@@ -11,16 +11,16 @@
             <table class="customers" id="{{names[i]}}">
                 <tr>
                     <th>#</th>
-                    <th>iNat</th>
-                    <th>FloraOn + iNat</th>
+                    <th>iNaturalist</th>
                     <th>FloraOn</th>
+                    <th>iNaturalist + FloraOn</th>
                 </tr>
-                {% for j in range(2,11,2)%}
+                {% for j in range(0,9,2)%}
                     <tr>
-                        <td>{{j - (j/2)}}</td>
-                        <td>{{inat[i][j]}} ({{inat[i][j+1]}})</td>
-                        <td>{{fl_inat[i][j]}} ({{fl_inat[i][j+1]}})</td>
-                        <td>{{flora[i][j]}} ({{flora[i][j+1]}})</td>
+                        <td>{{index[j]}}</td>
+                        <td>{{inat[i][j+2]}} - {{inat[i][j+3]}}</td>
+                        <td>{{flora[i][j+2]}} - {{flora[i][j+3]}}</td>
+                        <td>{{fl_inat[i][j+2]}} - {{fl_inat[i][j+3]}}</td>
                     </tr>
                 {% endfor %}
                 <script type="text/javascript">

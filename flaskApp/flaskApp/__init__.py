@@ -1,5 +1,9 @@
-from flask import Flask, render_template, url_for, redirect, request, session
 import os
+import sys
+
+sys.path.insert(0,'/var/www/flaskApp/flaskApp/venv/lib/python3.6/site-packages')
+
+from flask import Flask, render_template, url_for, redirect, request, session
 from werkzeug.utils import secure_filename
 import tensorflow as tf
 import numpy as np
@@ -9,14 +13,16 @@ from datetime import date
 
 app = Flask(__name__)
 
-app.config["IMAGE_UPLOADS"] = 'static/imgs'
-app.config["IMAGE_THUMBNAILS"] = "static/thumbnails"
+app.config["IMAGE_UPLOADS"] = "/var/www/flaskApp/flaskApp/static/imgs"
+app.config["IMAGE_THUMBNAILS"] = "/var/www/flaskApp/flaskApp/static/thumbnails"
 
 ALLOWED_EXTENSIONS = {'jpeg', 'png', 'jpg'}
-MODEL_FILES = ['models/iNaturalist.tflite',
-               'models/iNat_and_floraOn.tflite', 'models/floraOn.tflite']
-LABEL_FILES = ['dicts/iNaturalist.txt',
-               'dicts/iNat_and_floraOn.txt', 'dicts/floraOn.txt']
+MODEL_FILES = ['/var/www/flaskApp/flaskApp/models/iNaturalist.tflite',
+               '/var/www/flaskApp/flaskApp/models/iNat_and_floraOn.tflite',
+               '/var/www/flaskApp/flaskApp/models/floraOn.tflite']
+LABEL_FILES = ['/var/www/flaskApp/flaskApp/dicts/iNaturalist.txt',
+               '/var/www/flaskApp/flaskApp/dicts/iNat_and_floraOn.txt',
+               '/var/www/flaskApp/flaskApp/dicts/floraOn.txt']
 MODEL_NAMES = ['iNaturalist','Flora_On_and_iNat','Flora_On']
 
 
@@ -58,7 +64,8 @@ class Model:
                     r = float(results[i] / 255.0)
                 if min_confidence != None and r < min_confidence:
                     break
-                info.append(self.labels[i].replace(' ','_'))
+                #info.append(self.labels[i].replace(' ','_'))
+                info.append(self.labels[i])
                 info.append(str(round((r*100), 2)))
             return info
 
@@ -96,7 +103,7 @@ CREATE TABLE IF NOT EXISTS classifications
 '''
 #connect to database
 def connect_to_db():
-    conn = sqlite3.connect('db/tests.db')
+    conn = sqlite3.connect("var/www/flaskApp/flaskApp/db/tests.db")
     c = conn.cursor()
     c.execute(create_tests_table)
     c.execute(create_classifications_table)

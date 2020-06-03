@@ -23,11 +23,12 @@
                         <td>{{fl_inat[i][j+2]}} - {{fl_inat[i][j+3]}}</td>
                     </tr>
                 {% endfor %}
-                <script type="text/javascript">
-                    var id = "{{names[i]}}";
-                    var label = id.substring(0,id.lastIndexOf("_"));
-                    get_rows(id,label);
-                </script>
+                    <script type="text/javascript">
+		      var id = "{{names[i]}}";
+		      var label = "{{expert_label}}";
+		      console.log(id,label);
+		      get_rows(id,label);
+		    </script>
             </table>
         <hr>
         {% endfor %}
